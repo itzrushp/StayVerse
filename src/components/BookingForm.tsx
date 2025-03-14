@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Calendar } from '@/components/ui/calendar';
@@ -69,6 +68,11 @@ const BookingForm = ({ hotel, onSuccess }: BookingFormProps) => {
   const [rooms, setRooms] = useState('1');
   const [isLoading, setIsLoading] = useState(false);
   
+  // Debug states to show pricing factors
+  const [hasWeekendStay, setHasWeekendStay] = useState(false);
+  const [hasHolidayStay, setHasHolidayStay] = useState(false);
+  const [currentAvailability, setCurrentAvailability] = useState<'high' | 'medium' | 'low'>('medium');
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -85,13 +89,21 @@ const BookingForm = ({ hotel, onSuccess }: BookingFormProps) => {
   useEffect(() => {
     let price = hotel.price;
     const nights = differenceInDays(checkOut, checkIn);
-    const hasWeekend = Array.from({ length: nights }, (_, i) => addDays(checkIn, i))
-      .some(date => isWeekend(date));
-    const hasHoliday = Array.from({ length: nights }, (_, i) => addDays(checkIn, i))
-      .some(date => isHoliday(date));
+    
+    // Generate an array of all dates in the stay
+    const stayDates = Array.from({ length: nights }, (_, i) => addDays(checkIn, i));
+    
+    // Check if any date in the stay is a weekend
+    const hasWeekend = stayDates.some(date => isWeekend(date));
+    setHasWeekendStay(hasWeekend);
+    
+    // Check if any date in the stay is a holiday
+    const hasHoliday = stayDates.some(date => isHoliday(date));
+    setHasHolidayStay(hasHoliday);
     
     // Simulate random room availability
     const availabilityLevel = Object.keys(ROOM_AVAILABILITY)[Math.floor(Math.random() * 3)] as 'high' | 'medium' | 'low';
+    setCurrentAvailability(availabilityLevel);
     const availabilityValues = ROOM_AVAILABILITY[availabilityLevel];
     const availability = availabilityValues[Math.floor(Math.random() * availabilityValues.length)];
     
@@ -99,12 +111,14 @@ const BookingForm = ({ hotel, onSuccess }: BookingFormProps) => {
     if (hasWeekend) price *= 1.2; // 20% more expensive on weekends
     if (hasHoliday) price *= 1.5; // 50% more expensive on holidays
     
-    // Availability based pricing
-    if (availabilityLevel === 'high') {
-      price *= 1.3; // High demand: 30% premium
-    } else if (availabilityLevel === 'low') {
-      price *= 0.9; // Low demand: 10% discount
-    }
+    console.log('Price calculation:', {
+      basePrice: hotel.price,
+      nights,
+      hasWeekend,
+      hasHoliday,
+      availabilityLevel,
+      finalPrice: price
+    });
     
     // Round to nearest integer
     price = Math.round(price);
@@ -362,14 +376,21 @@ const BookingForm = ({ hotel, onSuccess }: BookingFormProps) => {
               <span>₹{totalPrice}</span>
             </div>
             
-            {/* Pricing factors explanation */}
             <div className="bg-primary/5 p-3 rounded-lg mt-4 text-xs">
               <p className="font-medium mb-1">Dynamic pricing factors:</p>
               <ul className="list-disc list-inside space-y-1">
-                <li>Weekend stays: +20% on weekend days</li>
-                <li>Holiday stays: +50% on holidays</li>
-                <li>High room demand: up to +30%</li>
-                <li>Low room demand: up to -10%</li>
+                <li className={hasWeekendStay ? "font-semibold text-primary" : ""}>
+                  Weekend stays: +20% on weekend days {hasWeekendStay && "✓"}
+                </li>
+                <li className={hasHolidayStay ? "font-semibold text-primary" : ""}>
+                  Holiday stays: +50% on holidays {hasHolidayStay && "✓"}
+                </li>
+                <li className={currentAvailability === 'high' ? "font-semibold text-primary" : ""}>
+                  High room demand: up to +30% {currentAvailability === 'high' && "✓"}
+                </li>
+                <li className={currentAvailability === 'low' ? "font-semibold text-primary" : ""}>
+                  Low room demand: up to -10% {currentAvailability === 'low' && "✓"}
+                </li>
               </ul>
             </div>
           </div>
