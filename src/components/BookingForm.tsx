@@ -180,7 +180,7 @@ const BookingForm = ({ hotel, onSuccess }: BookingFormProps) => {
                   {checkIn ? format(checkIn, "PPP") : <span>Check-in date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={checkIn}
@@ -205,7 +205,7 @@ const BookingForm = ({ hotel, onSuccess }: BookingFormProps) => {
                   {checkOut ? format(checkOut, "PPP") : <span>Check-out date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={checkOut}
