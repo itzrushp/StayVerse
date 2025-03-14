@@ -1,5 +1,5 @@
 
-import { Wifi, Coffee, UsersRound, Car, Ticket, Tree, Tv, UtensilsCrossed, Wind, DumbellIcon } from 'lucide-react';
+import { Wifi, Coffee, UsersRound, Car, Ticket, Trees, Tv, UtensilsCrossed, Wind, DumbbellIcon } from 'lucide-react';
 
 interface HotelAmenitiesProps {
   amenities: string[];
@@ -17,7 +17,7 @@ const HotelAmenities = ({ amenities }: HotelAmenitiesProps) => {
       case 'Pool':
         return <UsersRound className="w-4 h-4" />;
       case 'Gym':
-        return <DumbellIcon className="w-4 h-4" />;
+        return <DumbbellIcon className="w-4 h-4" />;
       case 'Spa':
         return <Wind className="w-4 h-4" />;
       case 'Parking':
@@ -25,7 +25,7 @@ const HotelAmenities = ({ amenities }: HotelAmenitiesProps) => {
       case 'TV':
         return <Tv className="w-4 h-4" />;
       case 'Garden':
-        return <Tree className="w-4 h-4" />;
+        return <Trees className="w-4 h-4" />;
       default:
         return <Ticket className="w-4 h-4" />;
     }
