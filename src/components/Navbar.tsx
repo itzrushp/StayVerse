@@ -1,11 +1,25 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { SignInDialog, RegisterDialog } from './AuthDialogs';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false);
+  const [isRegisterDialogOpen, setIsRegisterDialogOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,6 +32,19 @@ const Navbar = () => {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsMobileMenuOpen(false);
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase();
   };
 
   return (
@@ -64,12 +91,53 @@ const Navbar = () => {
               </Link>
             </nav>
             <div className="flex items-center space-x-4">
-              <button className="px-4 py-2 text-sm font-medium text-primary hover:underline transition-all">
-                Sign In
-              </button>
-              <button className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-all">
-                Register
-              </button>
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-primary text-primary-foreground">
+                          {user && getInitials(user.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <div className="flex items-center justify-start gap-2 p-2">
+                      <div className="flex flex-col space-y-1 leading-none">
+                        {user && (
+                          <>
+                            <p className="font-medium">{user.name}</p>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Button 
+                    variant="ghost"
+                    onClick={() => setIsSignInDialogOpen(true)}
+                  >
+                    Sign In
+                  </Button>
+                  <Button 
+                    onClick={() => setIsRegisterDialogOpen(true)}
+                  >
+                    Register
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
@@ -118,16 +186,66 @@ const Navbar = () => {
               </Link>
             </nav>
             <div className="flex flex-col space-y-2">
-              <button className="px-4 py-2 text-sm font-medium text-primary hover:underline w-full text-left">
-                Sign In
-              </button>
-              <button className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 w-full text-left">
-                Register
-              </button>
+              {isAuthenticated ? (
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2 p-2 border rounded-md">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {user && getInitials(user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-sm">{user?.name}</p>
+                      <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="w-full flex items-center justify-center"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="w-full text-left"
+                    onClick={() => {
+                      setIsSignInDialogOpen(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                  <Button 
+                    className="w-full text-left"
+                    onClick={() => {
+                      setIsRegisterDialogOpen(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    Register
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
+
+      {/* Auth Dialogs */}
+      <SignInDialog 
+        isOpen={isSignInDialogOpen}
+        onClose={() => setIsSignInDialogOpen(false)}
+      />
+      
+      <RegisterDialog
+        isOpen={isRegisterDialogOpen}
+        onClose={() => setIsRegisterDialogOpen(false)}
+      />
     </header>
   );
 };
