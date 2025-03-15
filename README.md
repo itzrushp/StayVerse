@@ -34,7 +34,11 @@ npm i
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
+
+#Step 5: Run server.js file for backend operations  you must run both to get registration and  login working
 ```
+
+
 
 **Edit a file directly in GitHub**
 
