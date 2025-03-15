@@ -26,7 +26,7 @@ interface RegisterFormProps {
 }
 
 const RegisterForm = ({ onClose }: RegisterFormProps) => {
-  const { register } = useAuth();
+  const { register, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<FormValues>({
@@ -111,8 +111,8 @@ const RegisterForm = ({ onClose }: RegisterFormProps) => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Registering...' : 'Register'}
+        <Button type="submit" className="w-full" disabled={isLoading || loading}>
+          {isLoading || loading ? 'Registering...' : 'Register'}
         </Button>
       </form>
     </Form>

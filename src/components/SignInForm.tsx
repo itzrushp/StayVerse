@@ -21,7 +21,7 @@ interface SignInFormProps {
 }
 
 const SignInForm = ({ onClose }: SignInFormProps) => {
-  const { login } = useAuth();
+  const { login, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<FormValues>({
@@ -40,7 +40,7 @@ const SignInForm = ({ onClose }: SignInFormProps) => {
         toast.success('Signed in successfully');
         onClose();
       } else {
-        toast.error('Failed to sign in');
+        toast.error('Invalid email or password');
       }
     } catch (error) {
       toast.error('An error occurred');
@@ -78,8 +78,8 @@ const SignInForm = ({ onClose }: SignInFormProps) => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Signing in...' : 'Sign In'}
+        <Button type="submit" className="w-full" disabled={isLoading || loading}>
+          {isLoading || loading ? 'Signing in...' : 'Sign In'}
         </Button>
       </form>
     </Form>

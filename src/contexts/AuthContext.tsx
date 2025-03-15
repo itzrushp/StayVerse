@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 // Define user type
 interface User {
@@ -15,7 +16,11 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  loading: boolean;
 }
+
+// API URL
+const API_URL = 'http://localhost:5000/api';
 
 // Create context with default values
 const AuthContext = createContext<AuthContextType>({
@@ -24,76 +29,117 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => false,
   register: async () => false,
   logout: () => {},
+  loading: false
 });
 
 // Auth provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Load user from localStorage on mount
+  // Load user from token on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
-    }
+    const loadUser = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+        
+        // Set auth header
+        axios.defaults.headers.common['x-auth-token'] = token;
+        
+        // Get user data
+        const res = await axios.get(`${API_URL}/user`);
+        
+        if (res.data) {
+          setUser({
+            id: res.data.id,
+            name: res.data.name,
+            email: res.data.email
+          });
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+        localStorage.removeItem('token');
+        delete axios.defaults.headers.common['x-auth-token'];
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadUser();
   }, []);
 
   // Login function
   const login = async (email: string, password: string): Promise<boolean> => {
+    setLoading(true);
     try {
-      // In a real app, validate credentials against a backend
-      // For now, we'll simulate a successful login for any input
-      const newUser = {
-        id: Math.random().toString(36).substring(2, 11),
-        name: email.split('@')[0], // Use part of email as name
-        email,
-      };
+      const res = await axios.post(`${API_URL}/login`, { email, password });
       
-      // Save user to localStorage
-      localStorage.setItem('user', JSON.stringify(newUser));
+      if (res.data.token) {
+        // Save token to localStorage
+        localStorage.setItem('token', res.data.token);
+        
+        // Set auth header
+        axios.defaults.headers.common['x-auth-token'] = res.data.token;
+        
+        // Update state
+        setUser(res.data.user);
+        setIsAuthenticated(true);
+        
+        return true;
+      }
       
-      // Update state
-      setUser(newUser);
-      setIsAuthenticated(true);
-      
-      return true;
+      return false;
     } catch (error) {
       console.error('Login failed:', error);
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
   // Register function
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
+    setLoading(true);
     try {
-      // In a real app, send registration data to backend
-      // For now, we'll simulate a successful registration
-      const newUser = {
-        id: Math.random().toString(36).substring(2, 11),
-        name,
-        email,
-      };
+      const res = await axios.post(`${API_URL}/register`, { name, email, password });
       
-      // Save user to localStorage
-      localStorage.setItem('user', JSON.stringify(newUser));
+      if (res.data.token) {
+        // Save token to localStorage
+        localStorage.setItem('token', res.data.token);
+        
+        // Set auth header
+        axios.defaults.headers.common['x-auth-token'] = res.data.token;
+        
+        // Update state
+        setUser(res.data.user);
+        setIsAuthenticated(true);
+        
+        return true;
+      }
       
-      // Update state
-      setUser(newUser);
-      setIsAuthenticated(true);
-      
-      return true;
+      return false;
     } catch (error) {
       console.error('Registration failed:', error);
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
   // Logout function
   const logout = () => {
-    // Remove user from localStorage
-    localStorage.removeItem('user');
+    // Remove token from localStorage
+    localStorage.removeItem('token');
+    
+    // Remove auth header
+    delete axios.defaults.headers.common['x-auth-token'];
     
     // Update state
     setUser(null);
@@ -101,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
