@@ -19,8 +19,10 @@ interface AuthContextType {
   loading: boolean;
 }
 
-// API URL
-const API_URL = 'http://localhost:5000/api';
+// API URL - Use the window.location origin to ensure it works in both development and production
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000/api' 
+  : `${window.location.origin}/api`;
 
 // Create context with default values
 const AuthContext = createContext<AuthContextType>({

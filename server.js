@@ -1,4 +1,3 @@
-
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -12,8 +11,17 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // In production, use environment variable
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allow requests from any origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
+}));
 app.use(express.json());
+
+// Serve static files from the React app in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static('dist'));
+}
 
 // Path to users data file
 const usersFilePath = path.join(__dirname, 'src/data/users.json');
@@ -150,5 +158,12 @@ app.get('/api/user', async (req, res) => {
     res.status(401).json({ message: 'Token is not valid' });
   }
 });
+
+// Handle React routing in production
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  });
+}
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
