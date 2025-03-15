@@ -1,9 +1,10 @@
 
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -14,28 +15,42 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // In production
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/travelApp')
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.log('MongoDB Connection Error:', err));
+// Path to users data file
+const usersFilePath = path.join(__dirname, 'src/data/users.json');
 
-// User Model
-const UserSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-});
+// Helper function to read users data
+const readUsersData = () => {
+  try {
+    const data = fs.readFileSync(usersFilePath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading users data:', error);
+    // If the file doesn't exist or is empty, return empty array
+    return [];
+  }
+};
 
-const User = mongoose.model('User', UserSchema);
+// Helper function to write users data
+const writeUsersData = (data) => {
+  try {
+    fs.writeFileSync(usersFilePath, JSON.stringify(data, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error('Error writing users data:', error);
+    return false;
+  }
+};
 
 // Routes
 app.post('/api/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
     
+    // Get current users
+    const users = readUsersData();
+    
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = users.find(user => user.email === email);
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
@@ -45,17 +60,23 @@ app.post('/api/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
     
     // Create new user
-    const newUser = new User({
+    const newUser = {
+      id: Date.now().toString(), // Simple ID generation
       name,
       email,
-      password: hashedPassword
-    });
+      password: hashedPassword,
+      createdAt: new Date().toISOString()
+    };
     
-    await newUser.save();
+    // Add to users array
+    users.push(newUser);
+    
+    // Save updated users
+    writeUsersData(users);
     
     // Create JWT token
     const token = jwt.sign(
-      { id: newUser._id, name: newUser.name, email: newUser.email },
+      { id: newUser.id, name: newUser.name, email: newUser.email },
       JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -63,7 +84,7 @@ app.post('/api/register', async (req, res) => {
     res.status(201).json({
       token,
       user: {
-        id: newUser._id,
+        id: newUser.id,
         name: newUser.name,
         email: newUser.email
       }
@@ -78,8 +99,11 @@ app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    // Get users
+    const users = readUsersData();
+    
     // Find user
-    const user = await User.findOne({ email });
+    const user = users.find(user => user.email === email);
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -92,7 +116,7 @@ app.post('/api/login', async (req, res) => {
     
     // Create JWT token
     const token = jwt.sign(
-      { id: user._id, name: user.name, email: user.email },
+      { id: user.id, name: user.name, email: user.email },
       JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -100,7 +124,7 @@ app.post('/api/login', async (req, res) => {
     res.json({
       token,
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email
       }
