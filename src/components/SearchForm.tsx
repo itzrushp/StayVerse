@@ -1,22 +1,48 @@
-
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Search, Users } from 'lucide-react';
 import { City } from '../data/hotels';
 
 interface SearchFormProps {
   className?: string;
   variant?: 'hero' | 'sidebar';
+  onSearch?: (searchParams: URLSearchParams) => void;
+  initialCity?: City;
+  initialCheckIn?: string;
+  initialCheckOut?: string;
+  initialGuests?: string;
 }
 
-const SearchForm = ({ className = '', variant = 'hero' }: SearchFormProps) => {
+const SearchForm: React.FC<SearchFormProps> = ({
+  className = '',
+  variant = 'hero',
+  onSearch,
+  initialCity = '',
+  initialCheckIn = '',
+  initialCheckOut = '',
+  initialGuests = '2',
+}) => {
   const navigate = useNavigate();
-  const [city, setCity] = useState<City | ''>('');
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
-  const [guests, setGuests] = useState('2');
+  const location = useLocation();
+  const [city, setCity] = useState<City | ''>(initialCity);
+  const [checkIn, setCheckIn] = useState(initialCheckIn);
+  const [checkOut, setCheckOut] = useState(initialCheckOut);
+  const [guests, setGuests] = useState(initialGuests);
 
-  const handleSearch = (e: React.FormEvent) => {
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const cityParam = params.get('city') as City | null;
+    const checkInParam = params.get('checkIn');
+    const checkOutParam = params.get('checkOut');
+    const guestsParam = params.get('guests');
+
+    if (cityParam) setCity(cityParam);
+    if (checkInParam) setCheckIn(checkInParam);
+    if (checkOutParam) setCheckOut(checkOutParam);
+    if (guestsParam) setGuests(guestsParam);
+  }, [location.search]);
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const searchParams = new URLSearchParams();
     
@@ -36,105 +62,117 @@ const SearchForm = ({ className = '', variant = 'hero' }: SearchFormProps) => {
       searchParams.append('guests', guests);
     }
     
-    navigate(`/search?${searchParams.toString()}`);
+    if (onSearch) {
+      onSearch(searchParams);
+    } else {
+      navigate(`/search?${searchParams.toString()}`);
+    }
   };
 
   return (
     <div 
-      className={`${className} ${
-        variant === 'hero' 
-          ? 'glass-card rounded-2xl p-6 md:p-8 w-full max-w-4xl mx-auto' 
-          : 'bg-white rounded-lg p-4 border border-border'
-      }`}
+      className={`
+        ${className}
+        ${variant === 'hero' 
+          ? 'glass-card rounded-2xl p-6 md:p-8 w-full max-w-4xl mx-auto shadow-lg'
+          : 'bg-white rounded-lg p-4 border border-border shadow-sm'}
+      `}
     >
       <form onSubmit={handleSearch}>
-        <div className={`flex flex-col ${variant === 'hero' ? 'md:flex-row' : ''} gap-4`}>
-          <div className={`relative ${variant === 'hero' ? 'md:w-1/3' : 'w-full'}`}>
+        <div className={`grid grid-cols-1 ${variant === 'hero' ? 'md:grid-cols-3' : 'sm:grid-cols-2'} gap-4`}>
+          <div className="col-span-1">
             <label htmlFor="city" className="block text-sm font-medium text-muted-foreground mb-1">
               Where
             </label>
             <div className="relative">
               <select
                 id="city"
-                className="search-input w-full appearance-none pr-10"
+                className="search-input w-full appearance-none pr-10 py-2 px-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:outline-none"
                 value={city}
                 onChange={(e) => setCity(e.target.value as City)}
                 required
               >
                 <option value="">Select destination</option>
-                <option value={City.Mumbai}>{City.Mumbai}</option>
-                <option value={City.Pune}>{City.Pune}</option>
-                <option value={City.Nagpur}>{City.Nagpur}</option>
+                {Object.values(City).map((cityOption) => (
+                  <option key={cityOption} value={cityOption}>
+                    {cityOption}
+                  </option>
+                ))}
               </select>
               <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             </div>
           </div>
           
-          <div className={`flex flex-col sm:flex-row gap-4 ${variant === 'hero' ? 'md:w-2/3' : 'w-full'}`}>
-            <div className="relative flex-1">
-              <label htmlFor="check-in" className="block text-sm font-medium text-muted-foreground mb-1">
-                Check In
-              </label>
-              <div className="relative">
-                <input
-                  id="check-in"
-                  type="date"
-                  className="search-input w-full"
-                  value={checkIn}
-                  onChange={(e) => setCheckIn(e.target.value)}
-                  required
-                />
-                <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <div className={`col-span-1 ${variant === 'hero' ? 'md:col-span-2' : 'sm:col-span-1'}`}>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-1">
+                <label htmlFor="check-in" className="block text-sm font-medium text-muted-foreground mb-1">
+                  Check In
+                </label>
+                <div className="relative">
+                  <input
+                    id="check-in"
+                    type="date"
+                    className="search-input w-full py-2 px-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:outline-none"
+                    value={checkIn}
+                    onChange={(e) => setCheckIn(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    required
+                  />
+                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                </div>
+              </div>
+              
+              <div className="col-span-1">
+                <label htmlFor="check-out" className="block text-sm font-medium text-muted-foreground mb-1">
+                  Check Out
+                </label>
+                <div className="relative">
+                  <input
+                    id="check-out"
+                    type="date"
+                    className="search-input w-full py-2 px-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:outline-none"
+                    value={checkOut}
+                    onChange={(e) => setCheckOut(e.target.value)}
+                    min={checkIn || new Date().toISOString().split('T')[0]}
+                    required
+                  />
+                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                </div>
               </div>
             </div>
-            
-            <div className="relative flex-1">
-              <label htmlFor="check-out" className="block text-sm font-medium text-muted-foreground mb-1">
-                Check Out
-              </label>
-              <div className="relative">
-                <input
-                  id="check-out"
-                  type="date"
-                  className="search-input w-full"
-                  value={checkOut}
-                  onChange={(e) => setCheckOut(e.target.value)}
-                  required
-                />
-                <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              </div>
-            </div>
-            
-            <div className="relative sm:w-24">
-              <label htmlFor="guests" className="block text-sm font-medium text-muted-foreground mb-1">
-                Guests
-              </label>
-              <div className="relative">
-                <select
-                  id="guests"
-                  className="search-input w-full appearance-none pr-10"
-                  value={guests}
-                  onChange={(e) => setGuests(e.target.value)}
-                >
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                </select>
-                <Users className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              </div>
+          </div>
+          
+          <div className="col-span-1">
+            <label htmlFor="guests" className="block text-sm font-medium text-muted-foreground mb-1">
+              Guests
+            </label>
+            <div className="relative">
+              <select
+                id="guests"
+                className="search-input w-full appearance-none pr-10 py-2 px-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:outline-none"
+                value={guests}
+                onChange={(e) => setGuests(e.target.value)}
+              >
+                {[1, 2, 3, 4].map((num) => (
+                  <option key={num} value={num.toString()}>
+                    {num}
+                  </option>
+                ))}
+              </select>
+              <Users className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             </div>
           </div>
         </div>
         
-        <div className={`mt-6 ${variant === 'hero' ? 'flex justify-center' : ''}`}>
+        <div className={`mt-6 ${variant === 'hero' ? 'flex justify-center' : 'flex justify-end'}`}>
           <button
             type="submit"
-            className={`${
-              variant === 'hero'
-                ? 'flex items-center justify-center px-8 py-3 bg-primary text-white rounded-lg shadow-md hover:bg-primary/90 transition-all duration-200 font-medium'
-                : 'w-full p-3 bg-primary text-white rounded-lg shadow-sm hover:bg-primary/90 transition-all'
-            }`}
+            className={`
+              ${variant === 'hero'
+                ? 'flex items-center justify-center px-8 py-3 bg-primary text-white rounded-lg shadow-md hover:bg-primary/90 transition-all duration-200 font-medium w-full md:w-auto'
+                : 'w-full p-3 bg-primary text-white rounded-lg shadow-sm hover:bg-primary/90 transition-all'}
+            `}
           >
             <Search className="h-4 w-4 mr-2" />
             Search Hotels
