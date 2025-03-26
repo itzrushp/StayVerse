@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Search, Users } from 'lucide-react';
+import { CalendarDays, MapPin, Search, Users } from 'lucide-react';
 import { City } from '../data/hotels';
 
 interface SearchFormProps {
@@ -31,19 +31,61 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const cityParam = params.get('city') as City | null;
+    const cityParam = params.get('city');
     const checkInParam = params.get('checkIn');
     const checkOutParam = params.get('checkOut');
     const guestsParam = params.get('guests');
 
-    if (cityParam) setCity(cityParam);
-    if (checkInParam) setCheckIn(checkInParam);
-    if (checkOutParam) setCheckOut(checkOutParam);
+    if (cityParam && Object.values(City).includes(cityParam as City)) {
+      setCity(cityParam as City);
+    } else {
+      setCity('');
+    }
+
+    if (checkInParam && isValidDate(checkInParam)) {
+      setCheckIn(checkInParam);
+    } else {
+      setCheckIn('');
+    }
+
+    if (checkOutParam && isValidDate(checkOutParam)) {
+      setCheckOut(checkOutParam);
+    } else {
+      setCheckOut('');
+    }
+
     if (guestsParam) setGuests(guestsParam);
   }, [location.search]);
 
+  const isValidDate = (dateString: string): boolean => {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
+  };
+
+  const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newCheckIn = e.target.value;
+    if (isValidDate(newCheckIn)) {
+      setCheckIn(newCheckIn);
+      if (newCheckIn > checkOut) {
+        setCheckOut('');
+      }
+    }
+  };
+
+  const handleCheckOutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newCheckOut = e.target.value;
+    if (isValidDate(newCheckOut) && newCheckOut >= checkIn) {
+      setCheckOut(newCheckOut);
+    }
+  };
+
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!city || !checkIn || !checkOut) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
     const searchParams = new URLSearchParams();
     
     if (city) {
@@ -89,7 +131,14 @@ const SearchForm: React.FC<SearchFormProps> = ({
                 id="city"
                 className="search-input w-full appearance-none pr-10 py-2 px-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:outline-none"
                 value={city}
-                onChange={(e) => setCity(e.target.value as City)}
+                onChange={(e) => {
+                  const selectedCity = e.target.value as City;
+                  if (Object.values(City).includes(selectedCity)) {
+                    setCity(selectedCity);
+                  } else {
+                    setCity('');
+                  }
+                }}
                 required
               >
                 <option value="">Select destination</option>
@@ -113,13 +162,14 @@ const SearchForm: React.FC<SearchFormProps> = ({
                   <input
                     id="check-in"
                     type="date"
-                    className="search-input w-full py-2 px-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:outline-none"
+                    className="search-input w-full py-2 px-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer" // Added cursor-pointer
                     value={checkIn}
-                    onChange={(e) => setCheckIn(e.target.value)}
+                    onChange={handleCheckInChange}
                     min={new Date().toISOString().split('T')[0]}
                     required
+                    onClick={(e) => e.currentTarget.showPicker()} // Added onClick to show the date picker
                   />
-                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <CalendarDays className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 cursor-pointer" onClick={(e) => e.currentTarget.previousElementSibling?.dispatchEvent(new Event('click', { bubbles: true }))} />
                 </div>
               </div>
               
@@ -131,13 +181,14 @@ const SearchForm: React.FC<SearchFormProps> = ({
                   <input
                     id="check-out"
                     type="date"
-                    className="search-input w-full py-2 px-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:outline-none"
+                    className="search-input w-full py-2 px-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer" // Added cursor-pointer
                     value={checkOut}
-                    onChange={(e) => setCheckOut(e.target.value)}
+                    onChange={handleCheckOutChange}
                     min={checkIn || new Date().toISOString().split('T')[0]}
                     required
+                    onClick={(e) => e.currentTarget.showPicker()} // Added onClick to show the date picker
                   />
-                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <CalendarDays className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 cursor-pointer" onClick={(e) => e.currentTarget.previousElementSibling?.dispatchEvent(new Event('click', { bubbles: true }))} />
                 </div>
               </div>
             </div>
