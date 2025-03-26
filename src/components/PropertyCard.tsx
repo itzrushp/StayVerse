@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Hotel } from '../data/hotels';
@@ -30,12 +29,12 @@ const PropertyCard = ({ hotel, featured = false }: PropertyCardProps) => {
         hover-card-animation group`}
     >
       <div className={`relative ${featured ? 'h-72' : 'h-52'} overflow-hidden`}>
-        <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
+        <div className={`absolute inset-0 bg-gray-200 ${imageLoaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}></div>
         <img
           src={hotel.images[0]}
           alt={hotel.name}
-          className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105
-            lazy-image ${!imageLoaded ? 'loading' : ''}`}
+          className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-102
+            opacity-0 ${imageLoaded ? 'opacity-100' : ''} transition-opacity duration-300`}
           onLoad={() => setImageLoaded(true)}
         />
         
