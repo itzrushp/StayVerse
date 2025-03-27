@@ -1,7 +1,13 @@
-
+import { useNavigate } from 'react-router-dom';
 import SearchForm from './SearchForm';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
+  const handleSearch = (searchParams: URLSearchParams) => {
+    navigate(`/search?${searchParams.toString()}`);
+  };
+
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background image */}
@@ -29,7 +35,7 @@ const Hero = () => {
         </div>
         
         <div className="animate-fade-in-delayed">
-          <SearchForm variant="hero" />
+          <SearchForm variant="hero" onSearch={handleSearch} />
         </div>
       </div>
     </div>
