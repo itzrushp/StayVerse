@@ -6,6 +6,8 @@ export default function RegisterPage() {
   const [name,setName] = useState('');
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
+
+ 
   async function registerUser(ev) {
     ev.preventDefault();
     try {
@@ -25,11 +27,11 @@ export default function RegisterPage() {
         <h1 className="text-4xl text-center mb-4">Register</h1>
         <form className="max-w-md mx-auto" onSubmit={registerUser}>
           <input type="text"
-                 placeholder="John Doe"
+                 placeholder="Sharma Ji"
                  value={name}
                  onChange={ev => setName(ev.target.value)} />
           <input type="email"
-                 placeholder="your@email.com"
+                 placeholder="sharma@email.com"
                  value={email}
                  onChange={ev => setEmail(ev.target.value)} />
           <input type="password"
