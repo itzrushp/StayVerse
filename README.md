@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Welcome to your Lovable project
 
 ## Project info
@@ -71,3 +72,7 @@ Simply open [Lovable](https://lovable.dev/projects/f8a4c349-ea87-4a54-aa2b-e46ed
 ## I want to use a custom domain - is that possible?
 
 We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+=======
+# StayVerse
+Stayverse is a full-stack hotel booking web application that features smart dynamic pricing powered by Deep Learning. The platform allows users to search, filter, and book hotels, while the backend intelligently adjusts pricing based on factors like demand, time, and availability.
+>>>>>>> fb55555418168d240be830303a74cb1309baca66
