@@ -1,78 +1,75 @@
-<<<<<<< HEAD
-# Welcome to your Lovable project
+# Stayverse
 
-## Project info
+Stayverse is a hotel booking web application featuring **dynamic pricing powered by Machine Learning**. The platform allows users to search, filter, and book hotels with prices intelligently adjusted based on demand, availability, and other market factors in real-time.
 
-**URL**: https://lovable.dev/projects/f8a4c349-ea87-4a54-aa2b-e46ed33dd9f0
+---
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- Search and browse hotels with real-time availability
+- Dynamic pricing engine using Deep Learning for optimal pricing
+- User authentication and secure booking management
+- Responsive and intuitive UI built with React
+- Backend API with Node.js, Express, and Firebase integration
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/f8a4c349-ea87-4a54-aa2b-e46ed33dd9f0) and start prompting.
+## Technologies Used
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend:** React, TypeScript
+- **Backend:** Node.js, Express
+- **Database & Auth:** Firebase
+- **Dynamic Pricing Model:** Deep Learning (TensorFlow/PyTorch)
+- **APIs:** RESTful APIs for smooth communication
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone the repo  
+   ```bash
+   git clone https://github.com/itzrushp/StayVerse.git
+   ```
 
-Follow these steps:
+2. Install dependencies for frontend and backend
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+ ```bash
+- cd StayVerse/frontend
+- npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-
-#Step 5: Run server.js file for backend operations  you must run both to get registration and  login working
+* cd ../backend
+* npm install
+* Setup environment variables (e.g., Firebase config, API keys)
 ```
 
+3. Run the application
+* Frontend
+```bash
+npm start
+```
 
+* Backend
+ ```bash
+npm run dev
+```
 
-**Edit a file directly in GitHub**
+# 5. Usage
+- Register or log in to the platform
+- Search hotels by location, dates, and preferences
+- Book your stay with dynamically calculated prices
+- View booking history and manage reservations
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+# 6. Future Improvements
+* Add payment gateway integration
+* Enhance dynamic pricing with more real-world datasets
+* Implement user reviews and ratings
+* Mobile app version
 
-**Use GitHub Codespaces**
+# Contributing
+* Contributions are welcome! Feel free to open issues or submit pull requests.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# License
+This project is licensed under the MIT License.
 
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/f8a4c349-ea87-4a54-aa2b-e46ed33dd9f0) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
-=======
-# StayVerse
-Stayverse is a full-stack hotel booking web application that features smart dynamic pricing powered by Deep Learning. The platform allows users to search, filter, and book hotels, while the backend intelligently adjusts pricing based on factors like demand, time, and availability.
->>>>>>> fb55555418168d240be830303a74cb1309baca66
+# Contact
+Created by Rush
